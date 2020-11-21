@@ -11,7 +11,7 @@
 # limitations under the License.
 #
 
-$(call inherit-product, build/target/product/embedded.mk)
+$(call inherit-product, build/target/product/base.mk)
 
 # Inherit from our custom product configuration
 $(call inherit-product, vendor/omni/config/common.mk)
@@ -30,8 +30,12 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     vendor.gatekeeper.disable_spu=true
 
 PRODUCT_PROPERTY_OVERRIDES += \
-	ro.adb.secure=0 \
-	ro.treble.enabled=true \
-	ro.boot.avb_version=1.0 \
-	ro.boot.vbmeta.avb_version=1.0 \
-	ro.vendor.build.security_patch=2099-12-31
+    ro.adb.secure=0 \
+    ro.treble.enabled=true \
+    ro.boot.avb_version=1.0 \
+    ro.boot.vbmeta.avb_version=1.0 \
+    ro.vendor.build.security_patch=2099-12-31
+
+# Soong namespaces
+PRODUCT_SOONG_NAMESPACES += \
+    $(LOCAL_PATH)

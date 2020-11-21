@@ -13,8 +13,8 @@
 
 DEVICE_PATH := device/xiaomi/pyxis
 
-# Assert
-TARGET_OTA_ASSERT_DEVICE := pyxis
+# For building with minimal manifest
+ALLOW_MISSING_DEPENDENCIES := true
 
 # Architecture
 TARGET_ARCH := arm64
@@ -31,39 +31,47 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a75
 
-ENABLE_CPUSETS := true
-ENABLE_SCHEDBOOST := true
-
 # Bootloader
-TARGET_USES_UEFI := true
-TARGET_NO_BOOTLOADER := true
+TARGET_USES_UEFI             := true
+TARGET_NO_BOOTLOADER         := true
 TARGET_BOOTLOADER_BOARD_NAME := sdm710
 
 # Kernel
-BOARD_KERNEL_CMDLINE := androidboot.console=ttyMSM0
+BOARD_KERNEL_CMDLINE += androidboot.console=ttyMSM0
 BOARD_KERNEL_CMDLINE += androidboot.hardware=qcom
-BOARD_KERNEL_CMDLINE += androidboot.memcg=1 
 BOARD_KERNEL_CMDLINE += androidboot.usbcontroller=a600000.dwc3
 BOARD_KERNEL_CMDLINE += console=ttyMSM0,115200n8
 BOARD_KERNEL_CMDLINE += earlycon=msm_geni_serial,0xA90000
-BOARD_KERNEL_CMDLINE += loop.max_part=16
 
-BOARD_KERNEL_BASE           := 0x00000000
+#BOARD_KERNEL_CMDLINE += androidboot.memcg=1
+#BOARD_KERNEL_CMDLINE += loop.max_part=7
+
+# see on early-init: write /sys/fs/selinux/enforce 0
+#BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
+
 BOARD_KERNEL_PAGESIZE       := 4096
 BOARD_KERNEL_IMAGE_NAME     := Image.gz-dtb
 BOARD_KERNEL_SEPARATED_DTBO := true
+BOARD_INCLUDE_RECOVERY_DTBO := true
 
-TARGET_PREBUILT_KERNEL   := $(DEVICE_PATH)/prebuilt/Image.gz-dtb
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 
-# Hack: prevent anti rollback (PLATFORM_VERSION need for decrypt)
-PLATFORM_VERSION := 16.1.0
-PLATFORM_SECURITY_PATCH := 2099-12-31
+BOARD_KERNEL_BASE        := 0x00000000
+BOARD_RAMDISK_OFFSET     := 0x01000000
+BOARD_KERNEL_TAGS_OFFSET := 0x00000100
+
+TARGET_KERNEL_ARCH          := arm64
+TARGET_KERNEL_CLANG_COMPILE := true
+TARGET_KERNEL_CLANG_VERSION := r353983d
+
+#TARGET_KERNEL_SOURCE := kernel/xiaomi/sdm710
+#TARGET_KERNEL_CONFIG := pyxis_defconfig
 
 # Platform
 TARGET_BOARD_PLATFORM := sdm710
 
-# Avb
-BOARD_AVB_ENABLE := true
+TARGET_PREBUILT_KERNEL   := $(DEVICE_PATH)/prebuilt/Image.gz-dtb
+#BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
 
 # Partitions
 BOARD_FLASH_BLOCK_SIZE := 262144
@@ -84,20 +92,26 @@ BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
 TARGET_COPY_OUT_VENDOR := vendor
 
 # File systems
-BOARD_HAS_LARGE_FILESYSTEM := true
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
-TARGET_USERIMAGES_SPARSE_EXT_DISABLED := false
+
+TARGET_INIT_VENDOR_LIB         := //$(DEVICE_PATH):libinit_pyxis
+TARGET_RECOVERY_DEVICE_MODULES := libinit_pyxis
 
 # Crypto
 TW_INCLUDE_CRYPTO := true
 TW_INCLUDE_CRYPTO_FBE := true
 
+# Security Patch Version
+PLATFORM_VERSION        := 16.1.1
+PLATFORM_SECURITY_PATCH := 2099-12-31
+VENDOR_SECURITY_PATCH   := 2099-12-31
+
 # Recovery
 RECOVERY_SDCARD_ON_DATA := true
 
 TW_THEME := portrait_hdpi
-TW_DEVICE_VERSION := SDK28-1.pyxis
+TW_DEVICE_VERSION := 0-pyxis
 
 TARGET_RECOVERY_PIXEL_FORMAT := "BGRA_8888"
 TARGET_RECOVERY_QCOM_RTC_FIX := true
@@ -106,9 +120,14 @@ TARGET_RECOVERY_QCOM_RTC_FIX := true
 TW_USE_TOOLBOX := true
 TW_EXCLUDE_DEFAULT_USB_INIT := true
 
-TW_Y_OFFSET             := 80
+TW_Y_OFFSET             :=  80
 TW_H_OFFSET             := -80
 TW_INPUT_BLACKLIST      := "hbtp_vm"
 TW_MAX_BRIGHTNESS       := 2047
 TW_DEFAULT_BRIGHTNESS   := 800
 TW_CUSTOM_CPU_TEMP_PATH := "/sys/class/thermal/thermal_zone6/temp"
+
+# TWRP Debugging
+TARGET_USES_LOGD    := true
+TWRP_EVENT_LOGGING  := false
+TWRP_INCLUDE_LOGCAT := true

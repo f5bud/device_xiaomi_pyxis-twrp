@@ -1,72 +1,52 @@
-on boot
-    setprop sys.usb.config adb
-
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
-
-    export ANDROID_ROOT /system_root
-
-    chmod 0660 /dev/qseecom
-    chown system drmrpc /dev/qseecom
     chmod 0664 /dev/ion
+    chmod 0660 /dev/qseecom
     chown system system /dev/ion
-
+    chown system drmrpc /dev/qseecom
     install_keyring
 
 on init
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 300000
+    write /sys/devices/system/cpu/cpu6/cpufreq/scaling_governor "schedutil"
+    write /sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq 300000
     start hwservicemanager
-    start qseecomd
+    start qseecom
 
 on property:vendor.sys.listeners.registered=true
     start keymaster-4-0
     start gatekeeper-1-0
     start servicemanager
 
-service qseecomd /sbin/qseecomd
+service qseecom /system/bin/qseecomd
     user root
     group root
     disabled
     seclabel u:r:recovery:s0
 
-service hwservicemanager /sbin/hwservicemanager
-    user root
-    group root
-    disabled
-    onrestart setprop hwservicemanager.ready false
-    seclabel u:r:recovery:s0
-ha
-service servicemanager /sbin/servicemanager
-    user root
-    group root readproc
-    disabled
-    seclabel u:r:recovery:s0
-
-service gatekeeper-1-0 /sbin/android.hardware.gatekeeper@1.0-service-qti
+service gatekeeper-1-0 /system/bin/android.hardware.gatekeeper@1.0-service-qti
     user root
     group root
     disabled
     seclabel u:r:recovery:s0
 
-service keymaster-4-0 /sbin/android.hardware.keymaster@4.0-service-qti
+service keymaster-4-0 /system/bin/android.hardware.keymaster@4.0-service-qti
     user root
     group root
     disabled
     seclabel u:r:recovery:s0
 
-service keystore /sbin/keystore /tmp/misc/keystore
-    user root
-    group root drmrpc readproc
-    disabled
-    seclabel u:r:recovery:s0
-
-service keystore_auth /sbin/keystore_auth
+service keystore_auth /system/bin/keystore_auth
     oneshot
     user system
     group root
     disabled
     seclabel u:r:recovery:s0
 
-service charger /charger -r
-    critical
-    seclabel u:r:charger:s0
+service keystore /system/bin/keystore /tmp/misc/keystore
+    user root
+    group root drmrpc readproc
+    disabled
+    seclabel u:r:recovery:s0
