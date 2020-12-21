@@ -13,9 +13,6 @@
 
 DEVICE_PATH := device/xiaomi/pyxis
 
-# Assert
-TARGET_OTA_ASSERT_DEVICE := pyxis
-
 # Architecture
 TARGET_ARCH := arm64
 TARGET_ARCH_VARIANT := armv8-a
@@ -31,39 +28,36 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a75
 
-ENABLE_CPUSETS := true
-ENABLE_SCHEDBOOST := true
-
 # Bootloader
-TARGET_USES_UEFI := true
-TARGET_NO_BOOTLOADER := true
+TARGET_USES_UEFI             := true
+TARGET_NO_BOOTLOADER         := true
 TARGET_BOOTLOADER_BOARD_NAME := sdm710
 
 # Kernel
-BOARD_KERNEL_CMDLINE := androidboot.console=ttyMSM0
+BOARD_KERNEL_BASE     := 0x00000000
+BOARD_KERNEL_PAGESIZE := 4096
+
+# must be > 15 ???
+PLATFORM_VERSION        := 16.1.0
+PLATFORM_SECURITY_PATCH := 2099-12-31
+
+BOARD_KERNEL_IMAGE_NAME      := Image.gz-dtb
+BOARD_KERNEL_SEPARATED_DTBO  := true
+BOARD_INCLUDE_RECOVERY_DTBO  := true
+
+BOARD_AVB_ENABLE := true
+
+TARGET_PREBUILT_KERNEL   := $(DEVICE_PATH)/prebuilt/Image.gz-dtb
+BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
+
+BOARD_KERNEL_CMDLINE += androidboot.console=ttyMSM0
 BOARD_KERNEL_CMDLINE += androidboot.hardware=qcom
-BOARD_KERNEL_CMDLINE += androidboot.memcg=1 
+BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
+BOARD_KERNEL_CMDLINE += androidboot.memcg=1
 BOARD_KERNEL_CMDLINE += androidboot.usbcontroller=a600000.dwc3
 BOARD_KERNEL_CMDLINE += console=ttyMSM0,115200n8
 BOARD_KERNEL_CMDLINE += earlycon=msm_geni_serial,0xA90000
-BOARD_KERNEL_CMDLINE += loop.max_part=16
-
-BOARD_KERNEL_BASE           := 0x00000000
-BOARD_KERNEL_PAGESIZE       := 4096
-BOARD_KERNEL_IMAGE_NAME     := Image.gz-dtb
-BOARD_KERNEL_SEPARATED_DTBO := true
-
-TARGET_PREBUILT_KERNEL   := $(DEVICE_PATH)/prebuilt/Image.gz-dtb
-
-# Hack: prevent anti rollback (PLATFORM_VERSION need for decrypt)
-PLATFORM_VERSION := 16.1.0
-PLATFORM_SECURITY_PATCH := 2099-12-31
-
-# Platform
-TARGET_BOARD_PLATFORM := sdm710
-
-# Avb
-BOARD_AVB_ENABLE := true
+BOARD_KERNEL_CMDLINE += loop.max_part=7
 
 # Partitions
 BOARD_FLASH_BLOCK_SIZE := 262144
@@ -84,10 +78,8 @@ BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
 TARGET_COPY_OUT_VENDOR := vendor
 
 # File systems
-BOARD_HAS_LARGE_FILESYSTEM := true
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
-TARGET_USERIMAGES_SPARSE_EXT_DISABLED := false
 
 # Crypto
 TW_INCLUDE_CRYPTO := true
@@ -97,7 +89,7 @@ TW_INCLUDE_CRYPTO_FBE := true
 RECOVERY_SDCARD_ON_DATA := true
 
 TW_THEME := portrait_hdpi
-TW_DEVICE_VERSION := SDK28-1.pyxis
+TW_DEVICE_VERSION := 1-pyxis
 
 TARGET_RECOVERY_PIXEL_FORMAT := "BGRA_8888"
 TARGET_RECOVERY_QCOM_RTC_FIX := true
@@ -112,3 +104,9 @@ TW_INPUT_BLACKLIST      := "hbtp_vm"
 TW_MAX_BRIGHTNESS       := 2047
 TW_DEFAULT_BRIGHTNESS   := 800
 TW_CUSTOM_CPU_TEMP_PATH := "/sys/class/thermal/thermal_zone6/temp"
+
+# TWRP Debugging
+TARGET_USES_LOGD    := true
+TWRP_EVENT_LOGGING  := false
+TWRP_INCLUDE_LOGCAT := true
+
